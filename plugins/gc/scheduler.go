@@ -117,6 +117,7 @@ func init() {
 				"ScheduleDelay":     fmt.Sprint(m.scheduleDelay),
 			}
 
+			//[maxing comment]: 模块一初始化就开始gc run。
 			go m.run(ic.Context)
 
 			return m, nil
@@ -317,6 +318,8 @@ func (s *gcScheduler) run(ctx context.Context) {
 
 		gcTime := stats.Elapsed()
 		gcTimeHist.Update(gcTime)
+		//[maxing comment]: 常见打印，日志：
+		//Aug 07 11:53:29 IP containerd[4151923]: time="2024-08-07T11:53:29.001379093+08:00" level=debug msg="garbage collected" d=72.74828ms
 		log.G(ctx).WithField("d", gcTime).Trace("garbage collected")
 		gcTimeSum += gcTime
 		collections++

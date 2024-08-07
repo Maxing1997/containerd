@@ -321,6 +321,8 @@ func (o *snapshotter) Remove(ctx context.Context, key string) (err error) {
 	// Remove directories after the transaction is closed, failures must not
 	// return error since the transaction is committed with the removal
 	// key no longer available.
+	//[maxing comment]: 这里删除目录
+	//[maxing comment]: 像 /data00/tce/nydus/containerd/io.containerd.snapshotter.v1.nydus/snapshots/874046 这样的，是和key强相关的。
 	defer func() {
 		if err == nil {
 			for _, dir := range removals {

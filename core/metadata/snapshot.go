@@ -45,7 +45,8 @@ type snapshotter struct {
 	snapshots.Snapshotter
 	name string
 	db   *DB
-	l    sync.RWMutex
+	//[maxing comment]: 读写锁。
+	l sync.RWMutex
 }
 
 // newSnapshotter returns a new Snapshotter which namespaces the given snapshot
@@ -98,6 +99,7 @@ func (s *snapshotter) resolveKey(ctx context.Context, key string) (string, error
 	return id, nil
 }
 
+// [maxing comment]: 这里有Stat
 func (s *snapshotter) Stat(ctx context.Context, key string) (snapshots.Info, error) {
 	ns, err := namespaces.NamespaceRequired(ctx)
 	if err != nil {
@@ -846,12 +848,14 @@ func validateSnapshot(info *snapshots.Info) error {
 
 // garbageCollect removes all snapshots that are no longer used.
 func (s *snapshotter) garbageCollect(ctx context.Context) (d time.Duration, err error) {
+	//[maxing comment]: 上写锁。
 	s.l.Lock()
 	t1 := time.Now()
 	defer func() {
 		s.l.Unlock()
 		if err == nil {
 			if c, ok := s.Snapshotter.(snapshots.Cleaner); ok {
+				//[maxing comment]: 核心的清理函数。
 				err = c.Cleanup(ctx)
 				if errdefs.IsNotImplemented(err) {
 					err = nil
@@ -859,6 +863,7 @@ func (s *snapshotter) garbageCollect(ctx context.Context) (d time.Duration, err 
 			}
 		}
 		if err == nil {
+			//[maxing comment]: 返回的是duration时间差。
 			d = time.Since(t1)
 		}
 	}()
@@ -917,6 +922,7 @@ func (s *snapshotter) garbageCollect(ctx context.Context) (d time.Duration, err 
 	// and having a cleanup method which actually performs the
 	// deletions on the snapshotters which support it.
 
+	//[maxing comment]: 感觉像是去裁剪那个snapshotter tree。
 	for _, node := range roots {
 		if err := s.pruneBranch(ctx, node); err != nil {
 			return 0, err
@@ -974,13 +980,17 @@ func (s *snapshotter) pruneBranch(ctx context.Context, node *treeNode) error {
 	}
 
 	if node.remove {
+		//[maxing comment]: 这里先加上了snapshotter到名字
 		logger := log.G(ctx).WithField("snapshotter", s.name)
+		//[maxing comment]: 调用snapshotter提供的借口进行remove
 		if err := s.Snapshotter.Remove(ctx, node.info.Name); err != nil {
 			if !errdefs.IsFailedPrecondition(err) {
 				return err
 			}
 			logger.WithError(err).WithField("key", node.info.Name).Warnf("failed to remove snapshot")
 		} else {
+			//[maxing comment]: 常见打印，日志
+			//Aug 07 11:53:28 IP containerd[4151923]: time="2024-08-07T11:53:28.990639369+08:00" level=debug msg="removed snapshot" key=faas/750772/prestart-pool-8ae5baa4-7bf2-4b5d-8029-08f622c703d6-snapshot-7af515bb-43cd-4089-84cf-b237839c9bd1 snapshotter=nydus
 			logger.WithField("key", node.info.Name).Debug("removed snapshot")
 		}
 	}

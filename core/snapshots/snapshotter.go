@@ -327,6 +327,7 @@ type Snapshotter interface {
 	//
 	// Should be used for parent resolution, existence checks and to discern
 	// the kind of snapshot.
+	//[maxing comment]: 查看key的状态。
 	Stat(ctx context.Context, key string) (Info, error)
 
 	// Update updates the info for a snapshot.
@@ -426,6 +427,7 @@ type Snapshotter interface {
 // has been removed and available for re-use. This is also useful when
 // performing multi-key removal with the intent of cleaning up all the
 // resources after each snapshot key has been removed.
+//[maxing comment]: 居然是个接口
 type Cleaner interface {
 	Cleanup(ctx context.Context) error
 }

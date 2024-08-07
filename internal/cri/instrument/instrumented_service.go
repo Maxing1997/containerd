@@ -416,6 +416,8 @@ func (in *instrumentedService) ImageFsInfo(ctx context.Context, r *runtime.Image
 		if err != nil {
 			log.G(ctx).WithError(err).Error("ImageFsInfo failed")
 		} else {
+			//[maxing comment]:日志
+			// Aug 07 11:53:29 IP containerd[4151923]: time="2024-08-07T11:53:29.061418661+08:00" level=debug msg="ImageFsInfo returns filesystem info [&FilesystemUsage{Timestamp:1723002801068089075,FsId:&FilesystemIdentifier{Mountpoint:/opt/tce/run/containerd/io.containerd.snapshotter.v1.nydus,},UsedBytes:&UInt64Value{Value:29539344384,},InodesUsed:&UInt64Value{Value:206554,},}]"
 			log.G(ctx).Tracef("ImageFsInfo returns filesystem info %+v", res.ImageFilesystems)
 		}
 		span.SetStatus(err)
@@ -447,6 +449,7 @@ func (in *instrumentedService) ContainerStats(ctx context.Context, r *runtime.Co
 	log.G(ctx).Tracef("ContainerStats for %q", r.GetContainerId())
 	defer func() {
 		if err != nil {
+			//[maxing comment]: 常见打印
 			log.G(ctx).WithError(err).Errorf("ContainerStats for %q failed", r.GetContainerId())
 		} else {
 			log.G(ctx).Tracef("ContainerStats for %q returns stats %+v", r.GetContainerId(), res.GetStats())

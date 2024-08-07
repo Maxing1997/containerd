@@ -75,7 +75,9 @@ func (s *service) Register(gs *grpc.Server) error {
 	return nil
 }
 
+//[maxing comment]: containerd Prepare入口
 func (s *service) Prepare(ctx context.Context, pr *snapshotsapi.PrepareSnapshotRequest) (*snapshotsapi.PrepareSnapshotResponse, error) {
+	//[maxing comment]: 常见打印。
 	log.G(ctx).WithField("parent", pr.Parent).WithField("key", pr.Key).Debugf("prepare snapshot")
 	sn, err := s.getSnapshotter(pr.Snapshotter)
 	if err != nil {
@@ -86,6 +88,7 @@ func (s *service) Prepare(ctx context.Context, pr *snapshotsapi.PrepareSnapshotR
 	if pr.Labels != nil {
 		opts = append(opts, snapshots.WithLabels(pr.Labels))
 	}
+	//[maxing comment]: 从这里走到snapshotter比如nydus的Prepare，sn就是snapshotter的前两个字母
 	mounts, err := sn.Prepare(ctx, pr.Key, pr.Parent, opts...)
 	if err != nil {
 		return nil, errdefs.ToGRPC(err)
@@ -115,6 +118,7 @@ func (s *service) View(ctx context.Context, pr *snapshotsapi.ViewSnapshotRequest
 	}, nil
 }
 
+//[maxing comment]: 常见打印。
 func (s *service) Mounts(ctx context.Context, mr *snapshotsapi.MountsRequest) (*snapshotsapi.MountsResponse, error) {
 	log.G(ctx).WithField("key", mr.Key).Debugf("get snapshot mounts")
 	sn, err := s.getSnapshotter(mr.Snapshotter)
@@ -164,6 +168,7 @@ func (s *service) Remove(ctx context.Context, rr *snapshotsapi.RemoveSnapshotReq
 }
 
 func (s *service) Stat(ctx context.Context, sr *snapshotsapi.StatSnapshotRequest) (*snapshotsapi.StatSnapshotResponse, error) {
+	//[maxing comment]: 常见打印。
 	log.G(ctx).WithField("key", sr.Key).Debugf("stat snapshot")
 	sn, err := s.getSnapshotter(sr.Snapshotter)
 	if err != nil {
@@ -247,6 +252,7 @@ func (s *service) Usage(ctx context.Context, ur *snapshotsapi.UsageRequest) (*sn
 	return snapshots.UsageToProto(usage), nil
 }
 
+//[maxing comment]: service cleanup的入口
 func (s *service) Cleanup(ctx context.Context, cr *snapshotsapi.CleanupRequest) (*ptypes.Empty, error) {
 	sn, err := s.getSnapshotter(cr.Snapshotter)
 	if err != nil {

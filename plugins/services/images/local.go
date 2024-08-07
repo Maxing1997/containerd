@@ -106,7 +106,9 @@ func (l *local) List(ctx context.Context, req *imagesapi.ListImagesRequest, _ ..
 	}, nil
 }
 
+//[maxing comment]: 创建image
 func (l *local) Create(ctx context.Context, req *imagesapi.CreateImageRequest, _ ...grpc.CallOption) (*imagesapi.CreateImageResponse, error) {
+	//[maxing comment]: 常见打印
 	log.G(ctx).WithField("name", req.Image.Name).WithField("target", req.Image.Target.Digest).Debugf("create image")
 	if req.Image.Name == "" {
 		return nil, status.Errorf(codes.InvalidArgument, "Image.Name required")

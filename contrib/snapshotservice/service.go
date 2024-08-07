@@ -97,6 +97,7 @@ func (s service) Remove(ctx context.Context, rr *snapshotsapi.RemoveSnapshotRequ
 	return empty, nil
 }
 
+//[maxing comment]: 这里也有Stat
 func (s service) Stat(ctx context.Context, sr *snapshotsapi.StatSnapshotRequest) (*snapshotsapi.StatSnapshotResponse, error) {
 	info, err := s.sn.Stat(ctx, sr.Key)
 	if err != nil {

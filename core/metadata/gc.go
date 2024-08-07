@@ -701,6 +701,8 @@ func (c *gcContext) remove(ctx context.Context, tx *bolt.Tx, node gc.Node) (inte
 			}
 			ssbkt := sbkt.Bucket([]byte(ss))
 			if ssbkt != nil {
+				//[maxing comment]: 清理snapshotter，日志
+				//Aug 07 11:53:28 IP containerd[4151923]: time="2024-08-07T11:53:28.955557397+08:00" level=debug msg="remove snapshot" key=prestart-pool-8ae5baa4-7bf2-4b5d-8029-08f622c703d6-snapshot-7af515bb-43cd-4089-84cf-b237839c9bd1 snapshotter=nydus
 				log.G(ctx).WithField("key", key).WithField("snapshotter", ss).Debug("remove snapshot")
 				return &eventstypes.SnapshotRemove{
 					Key:         key,

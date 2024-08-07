@@ -41,6 +41,7 @@ type proxySnapshotter struct {
 	snapshotterName string
 }
 
+//[maxing comment]: 这里是grpc的发送。
 func (p *proxySnapshotter) Stat(ctx context.Context, key string) (snapshots.Info, error) {
 	resp, err := p.client.Stat(ctx,
 		&snapshotsapi.StatSnapshotRequest{
@@ -183,6 +184,7 @@ func (p *proxySnapshotter) Close() error {
 	return nil
 }
 
+//[maxing comment]: 应该是这里发起远程 Cleanup操作。
 func (p *proxySnapshotter) Cleanup(ctx context.Context) error {
 	_, err := p.client.Cleanup(ctx, &snapshotsapi.CleanupRequest{
 		Snapshotter: p.snapshotterName,

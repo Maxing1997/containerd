@@ -368,6 +368,7 @@ func (s GCStats) Elapsed() time.Duration {
 }
 
 // GarbageCollect removes resources (snapshots, contents, ...) that are no longer used.
+// [maxing comment]: 负责清理资源
 func (m *DB) GarbageCollect(ctx context.Context) (gc.Stats, error) {
 	m.wlock.Lock()
 	t1 := time.Now()
@@ -399,8 +400,10 @@ func (m *DB) GarbageCollect(ctx context.Context) (gc.Stats, error) {
 				m.dirtyCS = true
 			}
 
+			//[maxing comment]: 根据content/snapshotter返回事件类型
 			event, err := c.remove(ctx, tx, n)
 			if event != nil && err == nil {
+				//加入到events
 				events = append(events,
 					namespacedEvent{
 						namespace: n.Namespace,
@@ -439,6 +442,8 @@ func (m *DB) GarbageCollect(ctx context.Context) (gc.Stats, error) {
 		stats.SnapshotD = map[string]time.Duration{}
 		wg.Add(len(m.dirtySS))
 		for snapshotterName := range m.dirtySS {
+			//[maxing comment]: 清理snapshotter，日志如下
+			//Aug 07 11:53:28 IP containerd[4151923]: time="2024-08-07T11:53:28.958772809+08:00" level=debug msg="schedule snapshotter cleanup" snapshotter=nydus
 			log.G(ctx).WithField("snapshotter", snapshotterName).Debug("schedule snapshotter cleanup")
 			go func(snapshotterName string) {
 				st1 := time.Now()
@@ -532,11 +537,14 @@ func (m *DB) cleanupSnapshotter(ctx context.Context, name string) (time.Duration
 		return 0, nil
 	}
 
+	//[maxing comment]: 调用snapshot.go里的garbageCollect -> snaspshotter层的Cleanup
 	d, err := sn.garbageCollect(ctx)
 	logger := log.G(ctx).WithField("snapshotter", name)
 	if err != nil {
 		logger.WithError(err).Warn("snapshot garbage collection failed")
 	} else {
+		//[maxing comment]: 移除snapshotter的打印，日志如下
+		//Aug 07 12:03:19 IP containerd[4151923]: time="2024-08-07T12:03:19.363109965+08:00" level=debug msg="snapshot garbage collected" d=81.870436ms snapshotter=nydus
 		logger.WithField("d", d).Tracef("snapshot garbage collected")
 	}
 	return d, err
