@@ -16,6 +16,8 @@
 
 package exchange
 
+//[maxing COMMENT]: 事件总线，有抽离成单独库，可以应用自己的代码中
+
 import (
 	"context"
 	"fmt"
@@ -52,7 +54,7 @@ var _ events.Subscriber = &Exchange{}
 //
 // This is useful when an event is forwarded on behalf of another namespace or
 // when the event is propagated on behalf of another publisher.
-//[maxing comment]: QUIZ 没看懂
+// [maxing comment]: QUIZ 没看懂
 func (e *Exchange) Forward(ctx context.Context, envelope *events.Envelope) (err error) {
 	if err := validateEnvelope(envelope); err != nil {
 		return err

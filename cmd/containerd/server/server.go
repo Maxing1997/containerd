@@ -16,6 +16,8 @@
 
 package server
 
+//[maxing COMMENT]: Server是主要的服务
+
 import (
 	"context"
 	"crypto/tls"
@@ -119,6 +121,7 @@ func CreateTopLevelDirectories(config *srvconfig.Config) error {
 }
 
 // New creates and initializes a new containerd server
+// [maxing COMMENT]: server 对象构造函数关键流程
 func New(ctx context.Context, config *srvconfig.Config) (*Server, error) {
 	var (
 		currentVersion = config.Version
@@ -144,10 +147,12 @@ func New(ctx context.Context, config *srvconfig.Config) (*Server, error) {
 		}
 		timeout.Set(key, d)
 	}
+	//[maxing COMMENT]: 装载服务插件, 在该子函数中注册了content 和 bolt 服务插件
 	loaded, err := LoadPlugins(ctx, config)
 	if err != nil {
 		return nil, err
 	}
+	//[maxing COMMENT]: 加载diff工具
 	for id, p := range config.StreamProcessors {
 		diff.RegisterProcessor(diff.BinaryHandler(id, p.Returns, p.Accepts, p.Path, p.Args, p.Env))
 	}
@@ -161,6 +166,7 @@ func New(ctx context.Context, config *srvconfig.Config) (*Server, error) {
 	prometheusServerMetrics := grpc_prometheus.NewServerMetrics(prometheusServerMetricsOpts...)
 	prometheus.MustRegister(prometheusServerMetrics)
 
+	//[maxing COMMENT]: 配置grpc的handler 拦截器
 	serverOpts := []grpc.ServerOption{
 		grpc.StatsHandler(otelgrpc.NewServerHandler()),
 		grpc.ChainStreamInterceptor(
@@ -178,6 +184,7 @@ func New(ctx context.Context, config *srvconfig.Config) (*Server, error) {
 	if config.GRPC.MaxSendMsgSize > 0 {
 		serverOpts = append(serverOpts, grpc.MaxSendMsgSize(config.GRPC.MaxSendMsgSize))
 	}
+	//[maxing COMMENT]: 创建server 用于IO通信
 	ttrpcServer, err := newTTRPCServer()
 	if err != nil {
 		return nil, err
@@ -225,10 +232,12 @@ func New(ctx context.Context, config *srvconfig.Config) (*Server, error) {
 		grpcServer = grpc.NewServer(serverOpts...)
 		tcpServer  = grpc.NewServer(tcpServerOpts...)
 
+		//[maxing COMMENT]: 创建三个分别需要注册到对应server的service数组
 		grpcServices  []grpcService
 		tcpServices   []tcpService
 		ttrpcServices []ttrpcService
 
+		//[maxing COMMENT]: 创建server对象
 		s = &Server{
 			prometheusServerMetrics: prometheusServerMetrics,
 			grpcServer:              grpcServer,
@@ -268,13 +277,16 @@ func New(ctx context.Context, config *srvconfig.Config) (*Server, error) {
 		log.G(ctx).WithFields(log.Fields{"id": id, "type": p.Type}).Info("loading plugin")
 		var mustSucceed int32
 
+		//[maxing COMMENT]: 初始化插件
 		initContext := plugin.NewContext(
 			ctx,
 			initialized,
 			map[string]string{
-				plugins.PropertyRootDir:      filepath.Join(config.Root, id),
-				plugins.PropertyStateDir:     filepath.Join(config.State, id),
-				plugins.PropertyGRPCAddress:  config.GRPC.Address,
+				plugins.PropertyRootDir:  filepath.Join(config.Root, id),
+				plugins.PropertyStateDir: filepath.Join(config.State, id),
+				//[maxing COMMENT]: grpc接口通信
+				plugins.PropertyGRPCAddress: config.GRPC.Address,
+				//[maxing COMMENT]: ttrpc 接口通信
 				plugins.PropertyTTRPCAddress: config.TTRPC.Address,
 			},
 		)
@@ -315,6 +327,7 @@ func New(ctx context.Context, config *srvconfig.Config) (*Server, error) {
 
 		delete(required, id)
 		// check for grpc services that should be registered with the server
+		//[maxing COMMENT]: 根据service插件实现的接口，将service对象实例放到不同数组中
 		if src, ok := instance.(grpcService); ok {
 			grpcServices = append(grpcServices, src)
 		}
@@ -336,6 +349,7 @@ func New(ctx context.Context, config *srvconfig.Config) (*Server, error) {
 	}
 
 	// register services after all plugins have been initialized
+	//[maxing COMMENT]: 向server 注册服务（service）
 	for _, service := range grpcServices {
 		if err := service.Register(grpcServer); err != nil {
 			return nil, err
@@ -353,6 +367,7 @@ func New(ctx context.Context, config *srvconfig.Config) (*Server, error) {
 	}
 
 	recordConfigDeprecations(ctx, config, initialized)
+	//[maxing COMMENT]: 对象构造完毕，返回containerd daemond server
 	return s, nil
 }
 
@@ -386,9 +401,11 @@ type Server struct {
 	grpcServer              *grpc.Server
 	ttrpcServer             *ttrpc.Server
 	tcpServer               *grpc.Server
-	config                  *srvconfig.Config
-	plugins                 []*plugin.Plugin
-	ready                   sync.WaitGroup
+	//[maxing COMMENT]: containerd 服务配置
+	config *srvconfig.Config
+	//[maxing COMMENT]: service 插件,服务插件化，方便服务扩展，值得参考借鉴
+	plugins []*plugin.Plugin
+	ready   sync.WaitGroup
 }
 
 // ServeGRPC provides the containerd grpc APIs on the provided listener
