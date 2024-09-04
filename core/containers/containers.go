@@ -27,6 +27,7 @@ import (
 // noted, the resources here are considered in use by the container.
 //
 // The resources specified in this object are used to create tasks from the container.
+// [maxing COMMENT]: container结构体
 type Container struct {
 	// ID uniquely identifies the container in a namespace.
 	//

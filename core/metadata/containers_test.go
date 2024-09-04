@@ -173,8 +173,9 @@ func TestContainersList(t *testing.T) {
 func TestContainersCreateUpdateDelete(t *testing.T) {
 	var (
 		ctx, db = testEnv(t)
-		store   = NewContainerStore(NewDB(db, nil, nil))
-		spec    = &specs.Spec{}
+		//[maxing COMMENT]: 创建了新的store
+		store = NewContainerStore(NewDB(db, nil, nil))
+		spec  = &specs.Spec{}
 	)
 
 	encoded, err := typeurl.MarshalAnyToProto(spec)
@@ -184,6 +185,7 @@ func TestContainersCreateUpdateDelete(t *testing.T) {
 	encodedUpdated, err := typeurl.MarshalAnyToProto(spec)
 	require.NoError(t, err)
 
+	//[maxing COMMENT]: 这里是个循环，testcase是其中一个
 	for _, testcase := range []struct {
 		name       string
 		original   containers.Container
@@ -619,6 +621,9 @@ func TestContainersCreateUpdateDelete(t *testing.T) {
 		},
 	} {
 		testcase := testcase
+		//[maxing COMMENT]: 这里相当于把testcase.name作为Container.ID了，
+		//除了UpdateIDFail，其他的都是空，从而input和originial、expected的ID是相同的。
+		//所以只要在传入的参数input里面设定好ID，再加上需要修改的内容，就可以对store里的进行修改。
 		t.Run(testcase.name, func(t *testing.T) {
 			testcase.original.ID = testcase.name
 			if testcase.input.ID == "" {
@@ -628,6 +633,7 @@ func TestContainersCreateUpdateDelete(t *testing.T) {
 
 			now := time.Now().UTC()
 
+			//[maxing COMMENT]: 这里针对original container创造了result containers.Container
 			result, err := store.Create(ctx, testcase.original)
 			if !errors.Is(err, testcase.createerr) {
 				if testcase.createerr == nil {
@@ -650,6 +656,7 @@ func TestContainersCreateUpdateDelete(t *testing.T) {
 			checkContainersEqual(t, &result, &testcase.original, "unexpected result on container update")
 
 			now = time.Now()
+			//[maxing COMMENT]: 可以看到预期的结果是和expected是一样的。
 			result, err = store.Update(ctx, testcase.input, testcase.fieldpaths...)
 			if !errors.Is(err, testcase.cause) {
 				if testcase.cause == nil {

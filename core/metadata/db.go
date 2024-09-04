@@ -257,6 +257,7 @@ func (m *DB) View(fn func(*bolt.Tx) error) error {
 }
 
 // Update runs a writable transaction on the metadata store.
+// [maxing COMMENT]: 这里的m.db是具体的数据库，目前是etcd的bolt
 func (m *DB) Update(fn func(*bolt.Tx) error) error {
 	m.wlock.RLock()
 	defer m.wlock.RUnlock()

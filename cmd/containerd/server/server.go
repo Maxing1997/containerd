@@ -489,10 +489,12 @@ func (s *Server) Wait() {
 // of all plugins.
 func LoadPlugins(ctx context.Context, config *srvconfig.Config) ([]plugin.Registration, error) {
 	// load all plugins into containerd
+	//[maxing COMMENT]: 如果没有指定插件的位置，那么默认从/var/lib/containerd/plugins目录中加载插件
 	path := config.PluginDir //nolint:staticcheck
 	if path == "" {
 		path = filepath.Join(config.Root, "plugins")
 	}
+	//[maxing COMMENT]: 实际上这里目前是空的，并不会加载任何插件
 	if count, err := dynamic.Load(path); err != nil {
 		return nil, err
 	} else if count > 0 || config.PluginDir != "" { //nolint:staticcheck
@@ -506,6 +508,9 @@ func LoadPlugins(ctx context.Context, config *srvconfig.Config) ([]plugin.Regist
 		InitFn: func(ic *plugin.InitContext) (interface{}, error) {
 			root := ic.Properties[plugins.PropertyRootDir]
 			ic.Meta.Exports["root"] = root
+			//[maxing COMMENT]:  注意，每个插件在初始化的时候都被修改了root目录，规则为：<root>/<plugin-type>.<plugin-id>
+			//对于content插件来说，root目录为：/var/lib/containerd/io.containerd.content.v1.content
+			//[maxing COMMENT]: 这里注册ContentPlugin实际上就是实例化local.store
 			return local.NewStore(root)
 		},
 	})

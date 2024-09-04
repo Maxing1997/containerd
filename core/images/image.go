@@ -32,6 +32,7 @@ import (
 )
 
 // Image provides the model for how containerd views container images.
+// [maxing COMMENT]: image结构体
 type Image struct {
 	// Name of the image.
 	//
@@ -84,6 +85,7 @@ func DeleteTarget(target *ocispec.Descriptor) DeleteOpt {
 }
 
 // Store and interact with images
+// [maxing COMMENT]: Store 接口很好理解，增删改查的操作。
 type Store interface {
 	Get(ctx context.Context, name string) (Image, error)
 	List(ctx context.Context, filters ...string) ([]Image, error)

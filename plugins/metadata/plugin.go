@@ -87,6 +87,7 @@ func init() {
 		Type: plugins.MetadataPlugin,
 		ID:   "bolt",
 		Requires: []plugin.Type{
+			//[maxing COMMENT]: 这里表明MetadataPlugin插件依赖ContentPlugin
 			plugins.ContentPlugin,
 			plugins.EventPlugin,
 			plugins.SnapshotPlugin,

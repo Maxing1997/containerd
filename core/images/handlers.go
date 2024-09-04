@@ -151,6 +151,7 @@ func WalkNotEmpty(ctx context.Context, handler Handler, descs ...ocispec.Descrip
 // with other handlers.
 //
 // If any handler returns an error, the dispatch session will be canceled.
+// [maxing COMMENT]: 参数 handler 切片包含多个 handler 函数， descs 镜像的文件清单， 递归把子文件清单也处理了。 接着看几个关键的 handler 函数。
 func Dispatch(ctx context.Context, handler Handler, limiter *semaphore.Weighted, descs ...ocispec.Descriptor) error {
 	eg, ctx2 := errgroup.WithContext(ctx)
 	for _, desc := range descs {

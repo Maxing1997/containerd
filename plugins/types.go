@@ -22,6 +22,7 @@ package plugins
 
 import "github.com/containerd/plugin"
 
+// [maxing COMMENT]: plugin的类型和 ctr plugin ls一起对照看。
 const (
 	// InternalPlugin implements an internal plugin to containerd
 	InternalPlugin plugin.Type = "io.containerd.internal.v1"

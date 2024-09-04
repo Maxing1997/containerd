@@ -38,6 +38,8 @@ import (
 // Note that until ingestion is complete, its content is not visible through
 // Provider or Manager. Once ingestion is complete, it is no longer exposed
 // through IngestManager.
+// [maxing COMMENT]:Store 接口包含四个匿名接口， Manager 提供了 content 接口， Provider 提供了指定内容的读接口，
+// IngestManager 提供了管理 ingest 的方法， Ingester 提供了写 content 的方法。
 type Store interface {
 	Manager
 	Provider
@@ -53,6 +55,7 @@ type ReaderAt interface {
 }
 
 // Provider provides a reader interface for specific content
+// [maxing COMMENT]: 此接口可以用于读取某镜像层（通过摘要）数据，并且可以指定偏移量
 type Provider interface {
 	// ReaderAt only requires desc.Digest to be set.
 	// Other fields in the descriptor may be used internally for resolving
@@ -115,6 +118,7 @@ type InfoReaderProvider interface {
 }
 
 // InfoProvider provides info for content inspection.
+// [maxing COMMENT]: 获取摘要所对应的镜像层的大小、创建时间、更新时间、标签信息，dgst相当于镜像层的ID，Info是直接通过读取操作系统中的镜像层文件返回的
 type InfoProvider interface {
 	// Info will return metadata about content available in the content store.
 	//
@@ -123,6 +127,7 @@ type InfoProvider interface {
 }
 
 // Manager provides methods for inspecting, listing and removing content.
+// [maxing COMMENT]: Manager实际上就是对于镜像层获取信息、修改信息、遍历镜像层以及删除镜像层的封装
 type Manager interface {
 	InfoProvider
 
@@ -131,14 +136,18 @@ type Manager interface {
 	// fields will be updated.
 	// Mutable fields:
 	//  labels.*
+	//[maxing COMMENT]: 更新镜像层的标签信息
 	Update(ctx context.Context, info Info, fieldpaths ...string) (Info, error)
 
 	// Walk will call fn for each item in the content store which
 	// match the provided filters. If no filters are given all
 	// items will be walked.
+	//[maxing COMMENT]: 遍历containerd存储的镜像层，并根据指定的过滤器过滤不满足要求的镜像层，这里的过滤器可以根据摘要、标签或者大小，不过根据源码显示
+	//根据大小过滤以及根据标签过滤并没有实现
 	Walk(ctx context.Context, fn WalkFunc, filters ...string) error
 
 	// Delete removes the content from the store.
+	//[maxing COMMENT]: 根据摘要删除某个镜像层
 	Delete(ctx context.Context, dgst digest.Digest) error
 }
 

@@ -41,6 +41,7 @@ type containerStore struct {
 }
 
 // NewContainerStore returns a Store backed by an underlying bolt DB
+// [maxing COMMENT]: 创造新的containers.store
 func NewContainerStore(db *DB) containers.Store {
 	return &containerStore{
 		db: db,
@@ -115,6 +116,7 @@ func (s *containerStore) List(ctx context.Context, fs ...string) ([]containers.C
 	return m, nil
 }
 
+// [maxing COMMENT]: Create 函数中创建存容器的 bucket
 func (s *containerStore) Create(ctx context.Context, container containers.Container) (containers.Container, error) {
 	namespace, err := namespaces.NamespaceRequired(ctx)
 	if err != nil {
@@ -133,6 +135,7 @@ func (s *containerStore) Create(ctx context.Context, container containers.Contai
 
 		cbkt, err := bkt.CreateBucket([]byte(container.ID))
 		if err != nil {
+			//[maxing COMMENT]: 已经存在了。
 			if err == bolt.ErrBucketExists {
 				err = fmt.Errorf("container %q: %w", container.ID, errdefs.ErrAlreadyExists)
 			}
@@ -153,16 +156,19 @@ func (s *containerStore) Create(ctx context.Context, container containers.Contai
 	return container, nil
 }
 
+// [maxing COMMENT]: 使用方法，传入一个自己构造的Container结构体，必须包括ID。
 func (s *containerStore) Update(ctx context.Context, container containers.Container, fieldpaths ...string) (containers.Container, error) {
 	namespace, err := namespaces.NamespaceRequired(ctx)
 	if err != nil {
 		return containers.Container{}, err
 	}
 
+	//[maxing COMMENT]: 传入的container，必须有container.ID
 	if container.ID == "" {
 		return containers.Container{}, fmt.Errorf("must specify a container id: %w", errdefs.ErrInvalidArgument)
 	}
 
+	//[maxing COMMENT]: 传出的container
 	var updated containers.Container
 	if err := update(ctx, s.db, func(tx *bolt.Tx) error {
 		bkt := getContainersBucket(tx, namespace)
@@ -170,11 +176,13 @@ func (s *containerStore) Update(ctx context.Context, container containers.Contai
 			return fmt.Errorf("cannot update container %q in namespace %q: %w", container.ID, namespace, errdefs.ErrNotFound)
 		}
 
+		//[maxing COMMENT]: cbkt是特定的container.ID的数据库
 		cbkt := bkt.Bucket([]byte(container.ID))
 		if cbkt == nil {
 			return fmt.Errorf("container %q: %w", container.ID, errdefs.ErrNotFound)
 		}
 
+		//[maxing COMMENT]: 读到updated
 		if err := readContainer(&updated, cbkt); err != nil {
 			return fmt.Errorf("failed to read container %q: %w", container.ID, err)
 		}
@@ -241,6 +249,7 @@ func (s *containerStore) Update(ctx context.Context, container containers.Contai
 
 		updated.CreatedAt = createdat
 		updated.UpdatedAt = time.Now().UTC()
+		//[maxing COMMENT]: 写回到数据库
 		if err := writeContainer(cbkt, &updated); err != nil {
 			return fmt.Errorf("failed to write container %q: %w", container.ID, err)
 		}

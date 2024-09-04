@@ -36,6 +36,7 @@ type store struct {
 	publisher events.Publisher
 }
 
+// [maxing COMMENT]: ContentService这个服务的注册代码
 func init() {
 	registry.Register(&plugin.Registration{
 		Type: plugins.ServicePlugin,
@@ -45,15 +46,18 @@ func init() {
 			plugins.MetadataPlugin,
 		},
 		InitFn: func(ic *plugin.InitContext) (interface{}, error) {
+			//[maxing COMMENT]: 获取元数据插件，其实元数据插件的实现原理就是依赖boltdb来存储KV键值对
 			m, err := ic.GetSingle(plugins.MetadataPlugin)
 			if err != nil {
 				return nil, err
 			}
+			//[maxing COMMENT]: 获取事件插件，实际上这里获取的就是事件biz层，有点类似于service注入biz层依赖
 			ep, err := ic.GetSingle(plugins.EventPlugin)
 			if err != nil {
 				return nil, err
 			}
 
+			//[maxing COMMENT]: 元数据的contentStore实际上就是对于blob的增删改查
 			s, err := newContentStore(m.(*metadata.DB).ContentStore(), ep.(events.Publisher))
 			return s, err
 		},
