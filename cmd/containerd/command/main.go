@@ -70,6 +70,7 @@ func init() {
 }
 
 // App returns a *cli.App instance.
+// [maxing COMMENT]: App 函数返回 `*cli.App` 实例
 func App() *cli.App {
 	app := cli.NewApp()
 	app.Name = "containerd"
@@ -113,6 +114,7 @@ can be used and modified as necessary as a custom configuration.`
 		},
 	}
 	app.Flags = append(app.Flags, serviceFlags()...)
+	//[maxing COMMENT]:  configCommand 用于生成配置文件 containerd config default > /etc/containerd/config.toml，publishCommand，ociHook
 	app.Commands = []*cli.Command{
 		configCommand,
 		publishCommand,
@@ -144,6 +146,9 @@ can be used and modified as necessary as a custom configuration.`
 			return err
 		}
 
+		//[maxing COMMENT]:  grpc address 不能为空，比如下面的配置文件
+		//[grpc]
+		//	address = "/run/containerd/containerd.sock"
 		if config.GRPC.Address == "" {
 			return fmt.Errorf("grpc address cannot be empty: %w", errdefs.ErrInvalidArgument)
 		}
@@ -204,6 +209,7 @@ can be used and modified as necessary as a custom configuration.`
 		go func() {
 			defer close(chsrv)
 
+			//[maxing COMMENT]: 然后调用err := server.New(ctx, config)
 			server, err := server.New(ctx, config)
 			if err != nil {
 				select {
@@ -281,6 +287,7 @@ can be used and modified as necessary as a custom configuration.`
 		if err != nil {
 			return fmt.Errorf("failed to get listener for main endpoint: %w", err)
 		}
+		//[maxing COMMENT]: 最后启动grpc server
 		serve(ctx, l, server.ServeGRPC)
 
 		readyC := make(chan struct{})

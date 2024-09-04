@@ -101,6 +101,7 @@ var execCommand = &cli.Command{
 			}
 		}
 
+		//[maxing COMMENT]: 得到spec的Process
 		pspec := spec.Process
 		pspec.Terminal = tty
 		pspec.Args = args
@@ -109,6 +110,7 @@ var execCommand = &cli.Command{
 			pspec.Cwd = cwd
 		}
 
+		//[maxing COMMENT]: 得到container对应的task
 		task, err := container.Task(ctx, nil)
 		if err != nil {
 			return err
@@ -150,6 +152,7 @@ var execCommand = &cli.Command{
 			ioCreator = cio.NewCreator(append([]cio.Opt{cio.WithStreams(stdinC, os.Stdout, os.Stderr)}, ioOpts...)...)
 		}
 
+		//[maxing COMMENT]: 开始执行
 		process, err := task.Exec(ctx, cliContext.String("exec-id"), pspec, ioCreator)
 		if err != nil {
 			return err

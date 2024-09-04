@@ -58,6 +58,7 @@ var restoreCommand = &cli.Command{
 		}
 		defer cancel()
 
+		//[maxing COMMENT]: 从ref获得image
 		checkpoint, err := client.GetImage(ctx, ref)
 		if err != nil {
 			if !errdefs.IsNotFound(err) {
@@ -68,6 +69,7 @@ var restoreCommand = &cli.Command{
 			if err != nil {
 				return err
 			}
+			//[maxing COMMENT]: 生成新的image
 			checkpoint = containerd.NewImage(client, ck)
 		}
 
@@ -104,6 +106,7 @@ var restoreCommand = &cli.Command{
 			}
 		}
 
+		//[maxing COMMENT]: 新任务
 		task, err := tasks.NewTask(ctx, client, ctr, "", con, false, "", []cio.Opt{}, topts...)
 		if err != nil {
 			return err
@@ -132,6 +135,7 @@ var restoreCommand = &cli.Command{
 		if err != nil {
 			return err
 		}
+		//[maxing COMMENT]: 删除ctx
 		if _, err := task.Delete(ctx); err != nil {
 			return err
 		}

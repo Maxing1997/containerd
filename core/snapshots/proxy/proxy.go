@@ -29,6 +29,7 @@ import (
 
 // NewSnapshotter returns a new Snapshotter which communicates over a GRPC
 // connection using the containerd snapshot GRPC API.
+// [maxing COMMENT]: 创建一个客户端
 func NewSnapshotter(client snapshotsapi.SnapshotsClient, snapshotterName string) snapshots.Snapshotter {
 	return &proxySnapshotter{
 		client:          client,
@@ -41,7 +42,7 @@ type proxySnapshotter struct {
 	snapshotterName string
 }
 
-//[maxing comment]: 这里是grpc的发送。
+// [maxing comment]: 这里是grpc的发送。
 func (p *proxySnapshotter) Stat(ctx context.Context, key string) (snapshots.Info, error) {
 	resp, err := p.client.Stat(ctx,
 		&snapshotsapi.StatSnapshotRequest{
@@ -184,7 +185,7 @@ func (p *proxySnapshotter) Close() error {
 	return nil
 }
 
-//[maxing comment]: 应该是这里发起远程 Cleanup操作。
+// [maxing comment]: 应该是这里发起远程 Cleanup操作。
 func (p *proxySnapshotter) Cleanup(ctx context.Context) error {
 	_, err := p.client.Cleanup(ctx, &snapshotsapi.CleanupRequest{
 		Snapshotter: p.snapshotterName,

@@ -57,6 +57,8 @@ var Command = &cli.Command{
 	},
 }
 
+// [maxing COMMENT]: Ref就是简称，比如docker.io/library/dummy_demo:latest这样的。
+// Digest就是镜像内容或者manifest的sha256值，用于保证唯一性。
 var listCommand = &cli.Command{
 	Name:        "list",
 	Aliases:     []string{"ls"},

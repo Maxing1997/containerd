@@ -149,6 +149,7 @@ func (r *remoteContainers) Delete(ctx context.Context, id string) error {
 
 }
 
+// [maxing COMMENT]: 传进来的是containers.Container，返回的是containersapi.Container。创造proto，而后从proto创造出我们想要的。
 func containerToProto(container *containers.Container) *containersapi.Container {
 	extensions := make(map[string]*ptypes.Any)
 	for k, v := range container.Extensions {

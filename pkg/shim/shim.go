@@ -138,6 +138,7 @@ const (
 	maxVersionEnv   = "MAX_SHIM_VERSION"
 )
 
+// [maxing COMMENT]: 主要是解析containerd-shim的参数，containerd-shim -h
 func parseFlags() {
 	flag.BoolVar(&debugFlag, "debug", false, "enable debug output in logs")
 	flag.BoolVar(&versionFlag, "v", false, "show the shim version and exit")
@@ -317,6 +318,7 @@ func run(ctx context.Context, manager Manager, config Config) error {
 		}
 	}
 
+	//[maxing COMMENT]: 建立 GRPC 服务
 	registry.Register(&plugin.Registration{
 		Type: plugins.InternalPlugin,
 		ID:   "shutdown",
@@ -431,6 +433,7 @@ func run(ctx context.Context, manager Manager, config Config) error {
 
 // serve serves the ttrpc API over a unix socket in the current working directory
 // and blocks until the context is canceled
+// [maxing COMMENT]: serve 如果没有指定 --socket 则从父继承过来
 func serve(ctx context.Context, server *ttrpc.Server, signals chan os.Signal, shutdown func()) error {
 	dump := make(chan os.Signal, 32)
 	setupDumpStacks(dump)

@@ -50,6 +50,7 @@ var Command = &cli.Command{
 	},
 }
 
+// [maxing COMMENT]: ctr c create
 var createCommand = &cli.Command{
 	Name:      "create",
 	Usage:     "Create container",
@@ -82,6 +83,7 @@ var createCommand = &cli.Command{
 			return err
 		}
 		defer cancel()
+		//[maxing COMMENT]: 调用底层运行时
 		_, err = run.NewContainer(ctx, client, cliContext)
 		if err != nil {
 			return err
@@ -112,10 +114,12 @@ var listCommand = &cli.Command{
 			return err
 		}
 		defer cancel()
+		//[maxing COMMENT]: 获得containers列表
 		containers, err := client.Containers(ctx, filters...)
 		if err != nil {
 			return err
 		}
+		//[maxing COMMENT]: quiet只打印id
 		if quiet {
 			for _, c := range containers {
 				fmt.Printf("%s\n", c.ID())
@@ -125,6 +129,7 @@ var listCommand = &cli.Command{
 		w := tabwriter.NewWriter(os.Stdout, 4, 8, 4, ' ', 0)
 		fmt.Fprintln(w, "CONTAINER\tIMAGE\tRUNTIME\t")
 		for _, c := range containers {
+			//[maxing COMMENT]: 获得info
 			info, err := c.Info(ctx, containerd.WithoutRefreshedMetadata)
 			if err != nil {
 				return err
@@ -145,6 +150,7 @@ var listCommand = &cli.Command{
 	},
 }
 
+// [maxing COMMENT]: ctr c delete
 var deleteCommand = &cli.Command{
 	Name:      "delete",
 	Usage:     "Delete one or more existing containers",
@@ -164,6 +170,7 @@ var deleteCommand = &cli.Command{
 		}
 		defer cancel()
 		deleteOpts := []containerd.DeleteOpts{}
+		//[maxing COMMENT]: 有个选项
 		if !cliContext.Bool("keep-snapshot") {
 			deleteOpts = append(deleteOpts, containerd.WithSnapshotCleanup)
 		}
@@ -171,6 +178,7 @@ var deleteCommand = &cli.Command{
 		if cliContext.NArg() == 0 {
 			return fmt.Errorf("must specify at least one container to delete: %w", errdefs.ErrInvalidArgument)
 		}
+		//[maxing COMMENT]: 这个看上去可以同时删除多个
 		for _, arg := range cliContext.Args().Slice() {
 			if err := deleteContainer(ctx, client, arg, deleteOpts...); err != nil {
 				if exitErr == nil {
@@ -196,6 +204,7 @@ func deleteContainer(ctx context.Context, client *containerd.Client, id string, 
 	if err != nil {
 		return err
 	}
+	//[maxing COMMENT]: 必须是stopped或者created，否则报错。
 	if status.Status == containerd.Stopped || status.Status == containerd.Created {
 		if _, err := task.Delete(ctx); err != nil {
 			return err
@@ -234,6 +243,7 @@ var setLabelsCommand = &cli.Command{
 		}
 
 		var labelStrings []string
+		//[maxing COMMENT]: 键值对。
 		for k, v := range setlabels {
 			labelStrings = append(labelStrings, fmt.Sprintf("%s=%s", k, v))
 		}
@@ -272,20 +282,25 @@ var infoCommand = &cli.Command{
 		if err != nil {
 			return err
 		}
+		//[maxing COMMENT]: 这个就是只显示spec
 		if cliContext.Bool("spec") {
 			v, err := typeurl.UnmarshalAny(info.Spec)
 			if err != nil {
 				return err
 			}
+			//[maxing COMMENT]: 这个是打印json
 			commands.PrintAsJSON(v)
 			return nil
 		}
 
+		//[maxing COMMENT]: spec不为空，处理不只打印spec。
 		if info.Spec != nil && info.Spec.GetValue() != nil {
+			//[maxing COMMENT]: 得到spec
 			v, err := typeurl.UnmarshalAny(info.Spec)
 			if err != nil {
 				return err
 			}
+			//[maxing COMMENT]: 这里是当场构建一个结构体，把spec给塞进来
 			commands.PrintAsJSON(struct {
 				containers.Container
 				Spec interface{} `json:"Spec,omitempty"`
@@ -295,6 +310,7 @@ var infoCommand = &cli.Command{
 			})
 			return nil
 		}
+		//[maxing COMMENT]: 这个就只打印info
 		commands.PrintAsJSON(info)
 		return nil
 	},

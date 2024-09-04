@@ -45,6 +45,7 @@ func (ts *localTransferService) pull(ctx context.Context, ir transfer.ImageFetch
 		})
 	}
 
+	//[maxing COMMENT]: ir.Resolve(ctx)就是transfer.ImageFetcher.Resolve: 正式调用 resolve 函数，解析 oci spec descriptor
 	name, desc, err := ir.Resolve(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to resolve image: %w", err)
@@ -92,6 +93,7 @@ func (ts *localTransferService) pull(ctx context.Context, ir transfer.ImageFetch
 		})
 	}
 
+	//[maxing COMMENT]: ir.Fetcher(ctx, name)就是transfer.ImageFetcher.Fetcher: 获取 fetcher，用于从 registry 拉取数据
 	fetcher, err := ir.Fetcher(ctx, name)
 	if err != nil {
 		return fmt.Errorf("failed to get fetcher for %q: %w", name, err)
@@ -169,6 +171,7 @@ func (ts *localTransferService) pull(ctx context.Context, ir transfer.ImageFetch
 		})
 	}
 
+	//[maxing COMMENT]: images.Handlers准备 image handle，将前面获得的 fetcher 传入；
 	handler = images.Handlers(append(baseHandlers,
 		fetchHandler(store, fetcher, progressTracker),
 		checkNeedsFix,
@@ -202,10 +205,12 @@ func (ts *localTransferService) pull(ctx context.Context, ir transfer.ImageFetch
 			if err != nil {
 				return fmt.Errorf("unable to initialize unpacker: %w", err)
 			}
+			//[maxing COMMENT]: unpacker.Unpack(handler)用 unpacker 封装 handler，用于解压镜像
 			handler = unpacker.Unpack(handler)
 		}
 	}
 
+	//[maxing COMMENT]: images.Dispatch(ctx, handler, ts.limiter, desc)利用之前封装的 fetcher 和 unpacker handler，下载镜像内容到 ts.content，多线程下载 child layer
 	if err := images.Dispatch(ctx, handler, ts.limiterD, desc); err != nil {
 		if unpacker != nil {
 			// wait for unpacker to cleanup
@@ -253,6 +258,8 @@ func (ts *localTransferService) pull(ctx context.Context, ir transfer.ImageFetch
 	return nil
 }
 
+// [maxing COMMENT]:  这里 ingester 是 store 接口， 实现的是 proxyContentStore 结构体，
+// 路径为 content/proxy/content_store.go 文件， 其向 containerd 守护进程发起 GRPC 请求。
 func fetchHandler(ingester content.Ingester, fetcher remotes.Fetcher, pt *ProgressTracker) images.HandlerFunc {
 	return func(ctx context.Context, desc ocispec.Descriptor) ([]ocispec.Descriptor, error) {
 		ctx = log.WithLogger(ctx, log.G(ctx).WithFields(log.Fields{

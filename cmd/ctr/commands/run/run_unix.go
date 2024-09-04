@@ -108,6 +108,7 @@ func NewContainer(ctx context.Context, client *containerd.Client, cliContext *cl
 		opts = append(opts, oci.WithSpecFromFile(cliContext.String("config")))
 	} else {
 		var (
+			//[maxing COMMENT]: 获得image的位置
 			ref = cliContext.Args().First()
 			// for container's id is Args[1]
 			args = cliContext.Args().Slice()[2:]
@@ -147,6 +148,7 @@ func NewContainer(ctx context.Context, client *containerd.Client, cliContext *cl
 			if err != nil {
 				return nil, err
 			}
+			//[maxing COMMENT]: 没有解压就需要去upack
 			if !unpacked {
 				if err := image.Unpack(ctx, snapshotter); err != nil {
 					return nil, err
@@ -393,6 +395,7 @@ func NewContainer(ctx context.Context, client *containerd.Client, cliContext *cl
 		}
 	}
 
+	//[maxing COMMENT]: 加上cni选项
 	if cliContext.Bool("cni") {
 		cniMeta := &commands.NetworkMetaData{EnableCni: true}
 		cOpts = append(cOpts, containerd.WithContainerExtension(commands.CtrCniMetadataExtension, cniMeta))
@@ -402,12 +405,15 @@ func NewContainer(ctx context.Context, client *containerd.Client, cliContext *cl
 	if err != nil {
 		return nil, err
 	}
+	//[maxing COMMENT]: cOpts加上runtimeOpts
 	cOpts = append(cOpts, containerd.WithRuntime(cliContext.String("runtime"), runtimeOpts))
 
+	//[maxing COMMENT]: spec保存opts
 	opts = append(opts, oci.WithAnnotations(commands.LabelArgs(cliContext.StringSlice("label"))))
 	var s specs.Spec
 	spec = containerd.WithSpec(&s, opts...)
 
+	//[maxing COMMENT]: cOpts还会加上spe
 	cOpts = append(cOpts, spec)
 
 	// oci.WithImageConfig (WithUsername, WithUserID) depends on access to rootfs for resolving via

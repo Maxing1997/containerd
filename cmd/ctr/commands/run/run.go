@@ -144,6 +144,7 @@ var Command = &cli.Command{
 			enableCNI = cliContext.Bool("cni")
 		)
 
+		//[maxing COMMENT]: 根据 ctr run [command options] Image|RootFS ID [COMMAND] [ARG...],Image 和 id 必须参数项
 		if config {
 			id = cliContext.Args().First()
 			if cliContext.NArg() > 1 {
@@ -170,10 +171,12 @@ var Command = &cli.Command{
 		}
 		defer cancel()
 
+		//[maxing COMMENT]: newContainer 直接调用 NewContainer，发送 GRPC 请求 Create 方法
 		container, err := NewContainer(ctx, client, cliContext)
 		if err != nil {
 			return err
 		}
+		//[maxing COMMENT]: context.Bool("rm") 一次性调用就删除，
 		if rm && !detach {
 			defer func() {
 				if err := container.Delete(ctx, containerd.WithSnapshotCleanup); err != nil {

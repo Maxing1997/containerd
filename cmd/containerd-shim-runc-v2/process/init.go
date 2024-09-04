@@ -115,6 +115,7 @@ func (p *Init) Create(ctx context.Context, r *CreateConfig) error {
 		pidFile = newPidFile(p.Bundle)
 	)
 
+	//[maxing COMMENT]: createIO 为 runc 创建管道
 	if r.Terminal {
 		if socket, err = runc.NewTempConsoleSocket(); err != nil {
 			return fmt.Errorf("failed to create OCI runtime console socket: %w", err)
@@ -141,6 +142,7 @@ func (p *Init) Create(ctx context.Context, r *CreateConfig) error {
 		opts.ConsoleSocket = socket
 	}
 
+	//[maxing COMMENT]: 结合Init结构体，可以知道p.runtime=runc.Runc，所以最后调用的是Runc的Create
 	if err := p.runtime.Create(ctx, r.ID, r.Bundle, opts); err != nil {
 		return p.runtimeError(err, "OCI runtime create failed")
 	}
@@ -389,6 +391,7 @@ func (p *Init) Exec(ctx context.Context, path string, r *ExecConfig) (Process, e
 }
 
 // exec returns a new exec'd process
+// [maxing COMMENT]: 对应exec注入
 func (p *Init) exec(ctx context.Context, path string, r *ExecConfig) (Process, error) {
 	// process exec request
 	var spec specs.Process

@@ -30,6 +30,7 @@ var checkpointCommand = &cli.Command{
 	Name:      "checkpoint",
 	Usage:     "Checkpoint a container",
 	ArgsUsage: "CONTAINER REF",
+	//[maxing COMMENT]: //三个选项
 	Flags: []cli.Flag{
 		&cli.BoolFlag{
 			Name:  "rw",
@@ -83,16 +84,19 @@ var checkpointCommand = &cli.Command{
 		}
 		// pause if running
 		if task != nil {
+			//[maxing COMMENT]: 暂停任务
 			if err := task.Pause(ctx); err != nil {
 				return err
 			}
 			defer func() {
+				//[maxing COMMENT]: 恢复任务
 				if err := task.Resume(ctx); err != nil {
 					fmt.Println(fmt.Errorf("error resuming task: %w", err))
 				}
 			}()
 		}
 
+		//[maxing COMMENT]: container执行Checkpoint操作
 		if _, err := container.Checkpoint(ctx, ref, opts...); err != nil {
 			return err
 		}

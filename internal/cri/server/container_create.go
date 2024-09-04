@@ -116,6 +116,7 @@ func (c *criService) CreateContainer(ctx context.Context, r *runtime.CreateConta
 	start := time.Now()
 
 	// Create container root directory.
+	//[maxing COMMENT]: 创建目录
 	containerRootDir := c.getContainerRootDir(id)
 	if err = c.os.MkdirAll(containerRootDir, 0755); err != nil {
 		return nil, fmt.Errorf("failed to create container root directory %q: %w",

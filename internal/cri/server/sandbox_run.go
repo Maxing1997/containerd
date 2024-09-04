@@ -53,6 +53,7 @@ func (c *criService) RunPodSandbox(ctx context.Context, r *runtime.RunPodSandbox
 	log.G(ctx).Debugf("Sandbox config %+v", config)
 
 	// Generate unique id and name for the sandbox and reserve the name.
+	//[maxing COMMENT]: id和名称
 	id := util.GenerateID()
 	metadata := config.GetMetadata()
 	if metadata == nil {
@@ -65,10 +66,12 @@ func (c *criService) RunPodSandbox(ctx context.Context, r *runtime.RunPodSandbox
 	// like CNI teardown and stopping the running sandbox task.
 	// If cleanup is not completed for some reason, the CRI-plugin will leave the sandbox
 	// in a not-ready state, which can later be cleaned up by the next execution of the kubelet's syncPod workflow.
+	//[maxing COMMENT]: 清除错误，可以得到最后一次错误原因。
 	var cleanupErr error
 
 	// Reserve the sandbox name to avoid concurrent `RunPodSandbox` request starting the
 	// same sandbox.
+	//[maxing COMMENT]: 保留这个名称，防止重名
 	if err := c.sandboxNameIndex.Reserve(name, id); err != nil {
 		return nil, fmt.Errorf("failed to reserve sandbox name %q: %w", name, err)
 	}

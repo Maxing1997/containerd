@@ -630,6 +630,7 @@ func (c *Client) ContentStore() content.Store {
 }
 
 // SnapshotService returns the underlying snapshotter for the provided snapshotter name
+// [maxing COMMENT]: 返回实际的snapshotter 
 func (c *Client) SnapshotService(snapshotterName string) snapshots.Snapshotter {
 	snapshotterName, err := c.resolveSnapshotterName(context.Background(), snapshotterName)
 	if err != nil {

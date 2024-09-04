@@ -40,12 +40,15 @@ func AppContext(cliContext *cli.Context) (context.Context, context.CancelFunc) {
 		namespace = cliContext.String("namespace")
 		cancel    context.CancelFunc
 	)
+	//[maxing COMMENT]: 获得对应namespace的ctx
 	ctx = namespaces.WithNamespace(ctx, namespace)
+	//[maxing COMMENT]: 看看是不是有超时时间
 	if timeout > 0 {
 		ctx, cancel = context.WithTimeout(ctx, timeout)
 	} else {
 		ctx, cancel = context.WithCancel(ctx)
 	}
+	//[maxing COMMENT]: 获得时间
 	if tm, err := epoch.SourceDateEpoch(); err != nil {
 		log.L.WithError(err).Warn("Failed to read SOURCE_DATE_EPOCH")
 	} else if tm != nil {
@@ -56,6 +59,7 @@ func AppContext(cliContext *cli.Context) (context.Context, context.CancelFunc) {
 }
 
 // NewClient returns a new containerd client
+// [maxing COMMENT]: 建立新的命令前端。
 func NewClient(cliContext *cli.Context, opts ...containerd.Opt) (*containerd.Client, context.Context, context.CancelFunc, error) {
 	timeoutOpt := containerd.WithTimeout(cliContext.Duration("connect-timeout"))
 	opts = append(opts, timeoutOpt)

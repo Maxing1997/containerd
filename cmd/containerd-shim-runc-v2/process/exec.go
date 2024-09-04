@@ -204,6 +204,7 @@ func (e *execProcess) start(ctx context.Context) (err error) {
 	if socket != nil {
 		opts.ConsoleSocket = socket
 	}
+	//[maxing COMMENT]: 这个比较重要
 	if err := e.parent.runtime.Exec(ctx, e.parent.id, e.spec, opts); err != nil {
 		close(e.waitBlock)
 		return e.parent.runtimeError(err, "OCI runtime exec failed")

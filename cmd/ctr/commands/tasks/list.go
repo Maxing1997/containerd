@@ -45,6 +45,7 @@ var listCommand = &cli.Command{
 			return err
 		}
 		defer cancel()
+		//[maxing COMMENT]: 这里就需要去services里找
 		s := client.TaskService()
 		response, err := s.List(ctx, &tasks.ListTasksRequest{})
 		if err != nil {
