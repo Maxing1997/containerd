@@ -24,6 +24,7 @@ import (
 )
 
 // InitContext is used for plugin initialization
+// [maxing COMMENT]: 插件初始上下文类以及插件类
 type InitContext struct {
 	Context           context.Context
 	Properties        map[string]string
@@ -65,6 +66,7 @@ type Plugin struct {
 	Config       interface{}  // config, as initialized
 	Meta         Meta
 
+	//[maxing COMMENT]: 插件化服务的实例对象
 	instance interface{}
 	err      error // will be set if there was an error initializing the plugin
 }

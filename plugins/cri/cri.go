@@ -43,7 +43,9 @@ import (
 // Register CRI service plugin
 func init() {
 	defaultConfig := criconfig.DefaultServerConfig()
+	//[maxing COMMENT]: 插件的注入通过目录containerd/cmd/containerd/各个文件利用go 包加载调用init函数的特性，向插件系统注册插件例如
 	registry.Register(&plugin.Registration{
+		//[maxing COMMENT]: grpc 通信插件
 		Type: plugins.GRPCPlugin,
 		ID:   "cri",
 		Requires: []plugin.Type{
@@ -51,6 +53,7 @@ func init() {
 			plugins.SandboxControllerPlugin,
 			plugins.NRIApiPlugin,
 			plugins.EventPlugin,
+			//[maxing COMMENT]: 依赖service插件
 			plugins.ServicePlugin,
 			plugins.LeasePlugin,
 			plugins.SandboxStorePlugin,

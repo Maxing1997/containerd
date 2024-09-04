@@ -35,6 +35,7 @@ import (
 )
 
 // Exchange broadcasts events
+// [maxing COMMENT]: 广播器
 type Exchange struct {
 	broadcaster *goevents.Broadcaster
 }

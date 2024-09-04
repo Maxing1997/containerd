@@ -56,19 +56,24 @@ type Type string
 func (t Type) String() string { return string(t) }
 
 // Registration contains information for registering a plugin
+// [maxing COMMENT]: 插件登记信息
 type Registration struct {
 	// Type of the plugin
+	//[maxing COMMENT]: 插件类型
 	Type Type
 	// ID of the plugin
+	//[maxing COMMENT]: 插件ID
 	ID string
 	// Config specific to the plugin
 	Config interface{}
 	// Requires is a list of plugins that the registered plugin requires to be available
+	//[maxing COMMENT]: 插件依赖链
 	Requires []Type
 
 	// InitFn is called when initializing a plugin. The registration and
 	// context are passed in. The init function may modify the registration to
 	// add exports, capabilities and platform support declarations.
+	//[maxing COMMENT]: 插件初始函数，返回关联到该插件对象的实例对象，需要使用插件化对象的外部构造函数
 	InitFn func(*InitContext) (interface{}, error)
 
 	// ConfigMigration allows a plugin to migrate configurations from an older

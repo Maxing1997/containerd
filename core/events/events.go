@@ -24,11 +24,16 @@ import (
 )
 
 // Envelope provides the packaging for an event.
+// [maxing COMMENT]: 信封对象，用于对事件消息的封装
 type Envelope struct {
+	//[maxing COMMENT]: 事件投递时间戳
 	Timestamp time.Time
+	//[maxing COMMENT]: 命名空间
 	Namespace string
-	Topic     string
-	Event     typeurl.Any
+	//[maxing COMMENT]: 事件topic
+	Topic string
+	//[maxing COMMENT]: 事件内容
+	Event typeurl.Any
 }
 
 // Field returns the value for the given fieldpath as a string, if defined.
@@ -64,6 +69,7 @@ func (e *Envelope) Field(fieldpath []string) (string, bool) {
 // Event is a generic interface for any type of event
 type Event interface{}
 
+// [maxing COMMENT]: Exchange 类实现了下面三个接口，用于事件的转发，订阅，和发布
 // Publisher posts the event.
 type Publisher interface {
 	Publish(ctx context.Context, topic string, event Event) error

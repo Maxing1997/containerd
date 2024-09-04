@@ -41,6 +41,7 @@ import (
 
 func init() {
 	registry.Register(&plugin.Registration{
+		//[maxing COMMENT]: 服务插件
 		Type: plugins.ServicePlugin,
 		ID:   services.ImagesService,
 		Requires: []plugin.Type{
@@ -75,6 +76,7 @@ type gcScheduler interface {
 	ScheduleAndWait(context.Context) (gc.Stats, error)
 }
 
+// [maxing COMMENT]: service 类，service类在应用层依赖 store 存储类，gc类，和事件总线类
 type local struct {
 	store    images.Store
 	gc       gcScheduler
@@ -106,7 +108,7 @@ func (l *local) List(ctx context.Context, req *imagesapi.ListImagesRequest, _ ..
 	}, nil
 }
 
-//[maxing comment]: 创建image
+// [maxing comment]: 创建image
 func (l *local) Create(ctx context.Context, req *imagesapi.CreateImageRequest, _ ...grpc.CallOption) (*imagesapi.CreateImageResponse, error) {
 	//[maxing comment]: 常见打印
 	log.G(ctx).WithField("name", req.Image.Name).WithField("target", req.Image.Target.Digest).Debugf("create image")
