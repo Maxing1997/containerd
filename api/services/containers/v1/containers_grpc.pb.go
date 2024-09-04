@@ -278,6 +278,7 @@ func _Containers_Delete_Handler(srv interface{}, ctx context.Context, dec func(i
 // Containers_ServiceDesc is the grpc.ServiceDesc for Containers service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
+//[maxing COMMENT]: 根据下面这个对应哪个 handler 处理
 var Containers_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "containerd.services.containers.v1.Containers",
 	HandlerType: (*ContainersServer)(nil),

@@ -141,6 +141,7 @@ func initFunc(ic *plugin.InitContext) (interface{}, error) {
 	return l, nil
 }
 
+// [maxing COMMENT]: 可以看到神秘的containers就是containers.Store
 type local struct {
 	containers containers.Store
 	store      content.Store
@@ -151,6 +152,7 @@ type local struct {
 }
 
 func (l *local) Create(ctx context.Context, r *api.CreateTaskRequest, _ ...grpc.CallOption) (*api.CreateTaskResponse, error) {
+	//[maxing COMMENT]: getContainer 根据容器 ID 拿到容器信息
 	container, err := l.getContainer(ctx, r.ContainerID)
 	if err != nil {
 		return nil, errdefs.ToGRPC(err)
@@ -196,6 +198,7 @@ func (l *local) Create(ctx context.Context, r *api.CreateTaskRequest, _ ...grpc.
 			return nil, err
 		}
 	}
+	//[maxing COMMENT]: 创建 runtime 的参数
 	opts := runtime.CreateOpts{
 		Spec: container.Spec,
 		IO: runtime.IO{
@@ -224,6 +227,7 @@ func (l *local) Create(ctx context.Context, r *api.CreateTaskRequest, _ ...grpc.
 		})
 	}
 
+	//[maxing COMMENT]: 获得runtime
 	rtime := l.v2Runtime
 
 	_, err = rtime.Get(ctx, r.ContainerID)
@@ -233,6 +237,8 @@ func (l *local) Create(ctx context.Context, r *api.CreateTaskRequest, _ ...grpc.
 	if err == nil {
 		return nil, errdefs.ToGRPC(fmt.Errorf("task %s: %w", r.ContainerID, errdefs.ErrAlreadyExists))
 	}
+	//[maxing COMMENT]: 旧版本runtime.Create 调用的为 runtime/v1/linux/runtime.go 中 Create 方法
+	//新版本已经变了。
 	c, err := rtime.Create(ctx, r.ContainerID, opts)
 	if err != nil {
 		return nil, errdefs.ToGRPC(err)
@@ -323,6 +329,7 @@ func (l *local) DeleteProcess(ctx context.Context, r *api.DeleteProcessRequest, 
 	}, nil
 }
 
+// [maxing COMMENT]: 关键函数，从runtime获取对应的task_status
 func getProcessState(ctx context.Context, p runtime.Process) (*task.Process, error) {
 	ctx, cancel := timeout.WithContext(ctx, stateTimeout)
 	defer cancel()
@@ -334,7 +341,9 @@ func getProcessState(ctx context.Context, p runtime.Process) (*task.Process, err
 		}
 		log.G(ctx).WithError(err).Errorf("get state for %s", p.ID())
 	}
+	//[maxing COMMENT]: status是给ctr用的
 	status := task.Status_UNKNOWN
+	//[maxing COMMENT]: sate是从runtime的信息来的，所以要去runtime看代码。
 	switch state.Status {
 	case runtime.CreatedStatus:
 		status = task.Status_CREATED
@@ -388,6 +397,7 @@ func (l *local) List(ctx context.Context, r *api.ListTasksRequest, _ ...grpc.Cal
 	if err != nil {
 		return nil, errdefs.ToGRPC(err)
 	}
+	//[maxing COMMENT]: 添加到resp
 	addTasks(ctx, resp, tasks)
 	return resp, nil
 }

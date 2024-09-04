@@ -38,11 +38,13 @@ import (
 	bolt "go.etcd.io/bbolt"
 )
 
+// [maxing COMMENT]: ImagesStore是实现Store接口的实例。
 type imageStore struct {
 	db *DB
 }
 
 // NewImageStore returns a store backed by a bolt DB
+// [maxing COMMENT]: 这里返回的imageStore居然就是images.Store。说明Store是个接口类型，所以只需要imageStore实现相应的get/set等方法就可以了。
 func NewImageStore(db *DB) images.Store {
 	return &imageStore{db: db}
 }
@@ -79,6 +81,7 @@ func (s *imageStore) Get(ctx context.Context, name string) (images.Image, error)
 	return image, nil
 }
 
+// [maxing COMMENT]: 这里以 namespace 作为 bucket， 剩下的就从 boltdb 读取， key value 读取完成，
 func (s *imageStore) List(ctx context.Context, fs ...string) ([]images.Image, error) {
 	namespace, err := namespaces.NamespaceRequired(ctx)
 	if err != nil {
@@ -121,6 +124,7 @@ func (s *imageStore) List(ctx context.Context, fs ...string) ([]images.Image, er
 	return m, nil
 }
 
+// [maxing COMMENT]: 创建 metadata bucket
 func (s *imageStore) Create(ctx context.Context, image images.Image) (images.Image, error) {
 	namespace, err := namespaces.NamespaceRequired(ctx)
 	if err != nil {
@@ -141,6 +145,7 @@ func (s *imageStore) Create(ctx context.Context, image images.Image) (images.Ima
 			return err
 		}
 
+		//[maxing COMMENT]: buckets里面创建对应名字的bucket
 		ibkt, err := bkt.CreateBucket([]byte(image.Name))
 		if err != nil {
 			if err != bolt.ErrBucketExists {
@@ -154,6 +159,7 @@ func (s *imageStore) Create(ctx context.Context, image images.Image) (images.Ima
 		// Ideally we should return an error when the value is already set.
 		// However, as `image.CreatedAt` is defined as a non-pointer `time.Time`, we can't compare it to nil.
 		// And we can't compare it to `time.Time{}` either, as `time.Time{}` is a proper timestamp (1970-01-01 00:00:00).
+		//[maxing COMMENT]: 时间
 		if tm := epoch.FromContext(ctx); tm != nil {
 			image.CreatedAt = tm.UTC()
 		} else {
@@ -165,6 +171,7 @@ func (s *imageStore) Create(ctx context.Context, image images.Image) (images.Ima
 		return images.Image{}, err
 	}
 
+	//[maxing COMMENT]: 发布事件
 	if publisher := s.db.Publisher(ctx); publisher != nil {
 		if err := publisher.Publish(ctx, "/images/create", &eventstypes.ImageCreate{
 			Name:   image.Name,
@@ -177,6 +184,7 @@ func (s *imageStore) Create(ctx context.Context, image images.Image) (images.Ima
 	return image, nil
 }
 
+// [maxing COMMENT]: 更新 metadata
 func (s *imageStore) Update(ctx context.Context, image images.Image, fieldpaths ...string) (images.Image, error) {
 	namespace, err := namespaces.NamespaceRequired(ctx)
 	if err != nil {

@@ -112,6 +112,9 @@ func FetchHandler(ingester content.Ingester, fetcher Fetcher) images.HandlerFunc
 func Fetch(ctx context.Context, ingester content.Ingester, fetcher Fetcher, desc ocispec.Descriptor) error {
 	log.G(ctx).Debug("fetch")
 
+	//[maxing COMMENT]: content.OpenWriter 向 containerd 发送 GRPC WriteContentRequest 请求， 包括 ref， total， digest。
+	//在看 containerd 处理 WriteContentRequest 请求。 containerd 先写入到 io.containerd.content.v1.content/ingest 下，
+	//最后 commit GRPC WriteContentRequest 请求成功时在移入到 io.containerd.content.v1.content/blobs/sha256 目录下。
 	cw, err := content.OpenWriter(ctx, ingester, content.WithRef(MakeRefKey(ctx, desc)), content.WithDescriptor(desc))
 	if err != nil {
 		return err
@@ -206,7 +209,6 @@ func push(ctx context.Context, provider content.Provider, pusher Pusher, desc oc
 // content.Manager) then this will also annotate the distribution sources using
 // labels prefixed with "containerd.io/distribution.source".
 func PushContent(ctx context.Context, pusher Pusher, desc ocispec.Descriptor, store content.Provider, limiter *semaphore.Weighted, platform platforms.MatchComparer, wrapper func(h images.Handler) images.Handler) error {
-
 	var m sync.Mutex
 	manifests := []ocispec.Descriptor{}
 	indexStack := []ocispec.Descriptor{}

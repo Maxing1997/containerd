@@ -64,6 +64,7 @@ func init() {
 			}
 
 			return &local{
+				//[maxing COMMENT]: 可以看出来 store 接口是插件 io.containerd.metadata.v1 实现的。
 				store:    metadata.NewImageStore(m.(*metadata.DB)),
 				gc:       g.(gcScheduler),
 				warnings: w.(warning.Service),

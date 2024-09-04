@@ -26,6 +26,7 @@ import (
 )
 
 func init() {
+	//[maxing COMMENT]: 注册插件 io.containerd.content.v1，store 结构体 实现了 Store 接口
 	registry.Register(&plugin.Registration{
 		Type: plugins.GRPCPlugin,
 		ID:   "content",

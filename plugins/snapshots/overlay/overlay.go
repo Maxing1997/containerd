@@ -190,6 +190,7 @@ func hasOption(options []string, key string, hasValue bool) bool {
 //
 // Should be used for parent resolution, existence checks and to discern
 // the kind of snapshot.
+// [maxing COMMENT]: 返回info
 func (o *snapshotter) Stat(ctx context.Context, key string) (info snapshots.Info, err error) {
 	var id string
 	if err := o.ms.WithTransaction(ctx, false, func(ctx context.Context) error {
@@ -338,6 +339,7 @@ func (o *snapshotter) Remove(ctx context.Context, key string) (err error) {
 			return fmt.Errorf("failed to remove snapshot %s: %w", key, err)
 		}
 
+		//[maxing COMMENT]: 不是asyncRemove就需要清理主机目录
 		if !o.asyncRemove {
 			removals, err = o.getCleanupDirectories(ctx)
 			if err != nil {
@@ -420,6 +422,7 @@ func (o *snapshotter) getCleanupDirectories(ctx context.Context) ([]string, erro
 		if _, ok := ids[d]; ok {
 			continue
 		}
+		//[maxing COMMENT]:没有就删除？
 		cleanup = append(cleanup, filepath.Join(snapshotDir, d))
 	}
 

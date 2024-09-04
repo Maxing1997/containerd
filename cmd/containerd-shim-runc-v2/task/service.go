@@ -247,6 +247,7 @@ func (s *service) preStart(c *runc.Container) (handleStarted func(*runc.Containe
 }
 
 // Create a new initial process and container with the underlying OCI runtime
+// [maxing COMMENT]: 这个的参数是发送的请求，返回值是回来的请求。
 func (s *service) Create(ctx context.Context, r *taskAPI.CreateTaskRequest) (_ *taskAPI.CreateTaskResponse, err error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()

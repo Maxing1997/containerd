@@ -119,6 +119,7 @@ func NewContainer(ctx context.Context, platform stdio.Platform, r *task.CreateTa
 		return nil, fmt.Errorf("failed to mount rootfs component: %w", err)
 	}
 
+	//[maxing COMMENT]: 这个返回值是process.init
 	p, err := newInit(
 		ctx,
 		r.Bundle,
@@ -214,7 +215,8 @@ func WriteRuntime(path, runtime string) error {
 }
 
 func newInit(ctx context.Context, path, workDir, namespace string, platform stdio.Platform,
-	r *process.CreateConfig, options *options.Options, rootfs string) (*process.Init, error) {
+	r *process.CreateConfig, options *options.Options, rootfs string,
+) (*process.Init, error) {
 	runtime := process.NewRunc(options.Root, path, namespace, options.BinaryName, options.SystemdCgroup)
 	p := process.New(r.ID, runtime, stdio.Stdio{
 		Stdin:    r.Stdin,

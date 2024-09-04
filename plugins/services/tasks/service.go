@@ -35,7 +35,9 @@ var (
 func init() {
 	registry.Register(&plugin.Registration{
 		Type: plugins.GRPCPlugin,
-		ID:   "tasks",
+		//[maxing COMMENT]: io.containerd.grpc.v1.tasks
+		//[maxing COMMENT]: 实现在 services/tasks/local.go
+		ID: "tasks",
 		Requires: []plugin.Type{
 			plugins.ServicePlugin,
 		},

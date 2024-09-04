@@ -14,6 +14,7 @@
 	limitations under the License.
 */
 
+//[maxing COMMENT]: 这个文件很重要，不理解就无法理解grpc调用
 syntax = "proto3";
 
 package containerd.services.containers.v1;
@@ -23,6 +24,8 @@ import "google/protobuf/empty.proto";
 import "google/protobuf/field_mask.proto";
 import "google/protobuf/timestamp.proto";
 
+//[maxing COMMENT]: 对比 c.cc.Invoke(ctx, "/containerd.services.containers.v1.Containers/Create
+//[maxing COMMENT]: 基本上确定是会调用到这个文件里来的，然后Containers/Create是我们的rpc里的Create调用
 option go_package = "github.com/containerd/containerd/api/services/containers/v1;containers";
 
 // Containers provides metadata storage for containers used in the execution

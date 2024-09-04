@@ -57,6 +57,7 @@ func (s *service) Register(server *grpc.Server) error {
 	return nil
 }
 
+// [maxing COMMENT]: 可以看到最后会转变到去local请求。
 func (s *service) Get(ctx context.Context, req *imagesapi.GetImageRequest) (*imagesapi.GetImageResponse, error) {
 	return s.local.Get(ctx, req)
 }

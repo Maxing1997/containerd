@@ -425,6 +425,8 @@ func (r *dockerResolver) Resolve(ctx context.Context, ref string) (string, ocisp
 	return "", ocispec.Descriptor{}, firstErr
 }
 
+// [maxing COMMENT]: dockerResolver 实现 Fetcher 方法。
+// 将镜像进行分析，包括远端 registry 名称， 仓库名称， tag等， 发请求就知道 host 地址
 func (r *dockerResolver) Fetcher(ctx context.Context, ref string) (remotes.Fetcher, error) {
 	base, err := r.resolveDockerBase(ref)
 	if err != nil {

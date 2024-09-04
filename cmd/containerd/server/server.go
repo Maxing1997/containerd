@@ -140,6 +140,7 @@ func New(ctx context.Context, config *srvconfig.Config) (*Server, error) {
 	if err := apply(ctx, config); err != nil {
 		return nil, err
 	}
+	//[maxing COMMENT]: 配置事件，比如  "io.containerd.timeout.shim.cleanup" = "5s"
 	for key, sec := range config.Timeouts {
 		d, err := time.ParseDuration(sec)
 		if err != nil {
@@ -178,6 +179,7 @@ func New(ctx context.Context, config *srvconfig.Config) (*Server, error) {
 			prometheusServerMetrics.UnaryServerInterceptor(),
 		),
 	}
+	//[maxing COMMENT]:获取 GRPC server 配置参数,比如max_recv_message_size
 	if config.GRPC.MaxRecvMsgSize > 0 {
 		serverOpts = append(serverOpts, grpc.MaxRecvMsgSize(config.GRPC.MaxRecvMsgSize))
 	}
@@ -248,6 +250,7 @@ func New(ctx context.Context, config *srvconfig.Config) (*Server, error) {
 		initialized = plugin.NewPluginSet()
 		required    = make(map[string]struct{})
 	)
+	//[maxing COMMENT]: 需要开启设置的插件
 	for _, r := range config.RequiredPlugins {
 		required[r] = struct{}{}
 	}
@@ -303,6 +306,7 @@ func New(ctx context.Context, config *srvconfig.Config) (*Server, error) {
 			}
 			initContext.Config = pc
 		}
+		//[maxing COMMENT]: Init调用各个注册的 InitFn 函数初始化,分别实现了不同的接口
 		result := p.Init(initContext)
 		if err := initialized.Add(result); err != nil {
 			return nil, fmt.Errorf("could not add plugin result to plugin set: %w", err)
@@ -349,7 +353,9 @@ func New(ctx context.Context, config *srvconfig.Config) (*Server, error) {
 	}
 
 	// register services after all plugins have been initialized
+	//[maxing COMMENT]: 各个插件初始化，实例化并注册服务
 	//[maxing COMMENT]: 向server 注册服务（service）
+	//[maxing COMMENT]: 对所有 grpc 服务分别调用 Register 方法注册。根据是否实现了 Register 接口，各个插件里面的实现的接口 Register
 	for _, service := range grpcServices {
 		if err := service.Register(grpcServer); err != nil {
 			return nil, err

@@ -46,6 +46,7 @@ func init() {
 	})
 }
 
+// [maxing COMMENT]: 实例化为 Service 结构体
 type service struct {
 	local api.ContainersClient
 	api.UnimplementedContainersServer
@@ -58,6 +59,7 @@ func (s *service) Register(server *grpc.Server) error {
 	return nil
 }
 
+// [maxing COMMENT]: 这里也会转发到local去。
 func (s *service) Get(ctx context.Context, req *api.GetContainerRequest) (*api.GetContainerResponse, error) {
 	return s.local.Get(ctx, req)
 }

@@ -23,6 +23,7 @@ import (
 	"github.com/containerd/plugin"
 )
 
+// [maxing COMMENT]: 依赖的插件
 var tasksServiceRequires = []plugin.Type{
 	plugins.EventPlugin,
 	plugins.RuntimePluginV2,

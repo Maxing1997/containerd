@@ -119,6 +119,7 @@ func (s *service) Transfer(ctx context.Context, req *transferapi.TransferRequest
 			transferOpts = append(transferOpts, transfer.WithProgress(pf))
 		}
 	}
+	//[maxing COMMENT]: 反序列化 grpc 参数
 	src, err := s.convertAny(ctx, req.Source)
 	if err != nil {
 		return nil, errdefs.ToGRPC(err)
