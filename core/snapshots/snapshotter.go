@@ -427,7 +427,7 @@ type Snapshotter interface {
 // has been removed and available for re-use. This is also useful when
 // performing multi-key removal with the intent of cleaning up all the
 // resources after each snapshot key has been removed.
-//[maxing comment]: 居然是个接口
+// [maxing comment]: 居然是个接口
 type Cleaner interface {
 	Cleanup(ctx context.Context) error
 }

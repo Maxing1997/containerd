@@ -206,6 +206,7 @@ func WithSnapshot(id string) NewContainerOpts {
 }
 
 // WithSnapshotCleanup deletes the rootfs snapshot allocated for the container
+// [maxing COMMENT]: 这个会删除sansphot
 func WithSnapshotCleanup(ctx context.Context, client *Client, c containers.Container) error {
 	if c.SnapshotKey != "" {
 		if c.Snapshotter == "" {

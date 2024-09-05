@@ -405,7 +405,6 @@ func (s *snapshotter) createSnapshot(ctx context.Context, key, parent string, re
 					tinfo = &i
 				}
 				return nil
-
 			}, filter); err != nil {
 				return nil, fmt.Errorf("failed walking backend snapshots: %w", err)
 			}
@@ -647,7 +646,6 @@ func (s *snapshotter) Commit(ctx context.Context, name, key string, opts ...snap
 	}); err != nil {
 		if bname != "" {
 			log.G(ctx).WithField("snapshotter", s.name).WithField("key", key).WithField("bname", bname).WithError(err).Error("uncommittable snapshot: transaction failed after commit, snapshot should be removed")
-
 		}
 		return err
 	}
@@ -665,7 +663,6 @@ func (s *snapshotter) Commit(ctx context.Context, name, key string, opts ...snap
 	}
 
 	return rerr
-
 }
 
 func (s *snapshotter) Remove(ctx context.Context, key string) error {
@@ -679,14 +676,17 @@ func (s *snapshotter) Remove(ctx context.Context, key string) error {
 
 	if err := update(ctx, s.db, func(tx *bolt.Tx) error {
 		var sbkt *bolt.Bucket
+		//[maxing COMMENT]: sname代表是哪个snapshotter
 		bkt := getSnapshotterBucket(tx, ns, s.name)
 		if bkt != nil {
+			//[maxing COMMENT]: key就是snapshot ID
 			sbkt = bkt.Bucket([]byte(key))
 		}
 		if sbkt == nil {
 			return fmt.Errorf("snapshot %v does not exist: %w", key, errdefs.ErrNotFound)
 		}
 
+		//[maxing COMMENT]: 获得children，如果snapshot有孩子，不能移除。
 		cbkt := sbkt.Bucket(bucketKeyChildren)
 		if cbkt != nil {
 			if child, _ := cbkt.Cursor().First(); child != nil {
@@ -694,6 +694,7 @@ func (s *snapshotter) Remove(ctx context.Context, key string) error {
 			}
 		}
 
+		//[maxing COMMENT]: 移除parent对这个snapshot的引用
 		parent := sbkt.Get(bucketKeyParent)
 		if len(parent) > 0 {
 			pbkt := bkt.Bucket(parent)
@@ -708,6 +709,7 @@ func (s *snapshotter) Remove(ctx context.Context, key string) error {
 			}
 		}
 
+		//[maxing COMMENT]: 删除snapshot key
 		if err := bkt.DeleteBucket([]byte(key)); err != nil {
 			return err
 		}
@@ -716,7 +718,9 @@ func (s *snapshotter) Remove(ctx context.Context, key string) error {
 		}
 
 		// Mark snapshotter as dirty for triggering garbage collection
+		//[maxing COMMENT]: 用原子变量表示db脏了
 		atomic.AddUint32(&s.db.dirty, 1)
+		//[maxing COMMENT]: 哑变量存放snapshotter的名字，比如nydus
 		s.db.dirtySS[s.name] = struct{}{}
 
 		return nil

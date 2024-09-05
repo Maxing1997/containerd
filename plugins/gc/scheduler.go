@@ -185,6 +185,7 @@ func newScheduler(c collector, cfg *config) *gcScheduler {
 	return s
 }
 
+// [maxing COMMENT]: 进行一次垃圾回收，然后等待。
 func (s *gcScheduler) ScheduleAndWait(ctx context.Context) (gc.Stats, error) {
 	return s.wait(ctx, true)
 }
@@ -218,6 +219,7 @@ func (s *gcScheduler) wait(ctx context.Context, trigger bool) (gc.Stats, error) 
 	return gcStats, nil
 }
 
+// [maxing COMMENT]: 给s.eventC发送信号。
 func (s *gcScheduler) mutationCallback(dirty bool) {
 	e := mutationEvent{
 		ts:       time.Now(),
@@ -264,6 +266,7 @@ func (s *gcScheduler) run(ctx context.Context) {
 				schedC, nextCollection = schedule(interval)
 				continue
 			}
+		//[maxing COMMENT]: 这里有信号过来。
 		case e := <-s.eventC:
 			if lastCollection != nil && lastCollection.After(e.ts) {
 				continue
@@ -309,6 +312,7 @@ func (s *gcScheduler) run(ctx context.Context) {
 			lastCollection = &last
 
 			for _, w := range s.waiters {
+				//[maxing COMMENT]:关掉channel也会产生一个-> 到对端。
 				close(w)
 			}
 			s.waiters = nil

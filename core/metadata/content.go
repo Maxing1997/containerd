@@ -276,7 +276,6 @@ func (cs *contentStore) ListStatuses(ctx context.Context, fs ...string) ([]conte
 	}
 
 	return statuses, nil
-
 }
 
 func getRef(tx *bolt.Tx, ns, ref string) string {
@@ -355,7 +354,6 @@ func (cs *contentStore) Abort(ctx context.Context, ref string) error {
 
 		return nil
 	})
-
 }
 
 func (cs *contentStore) Writer(ctx context.Context, opts ...content.WriterOpt) (content.Writer, error) {
@@ -813,6 +811,7 @@ func writeExpireAt(expire time.Time, bkt *bolt.Bucket) error {
 }
 
 // garbageCollect removes all contents that are no longer used.
+// [maxing COMMENT]: 这里是content store的垃圾回收
 func (cs *contentStore) garbageCollect(ctx context.Context) (d time.Duration, err error) {
 	cs.l.Lock()
 	t1 := time.Now()

@@ -145,7 +145,7 @@ func (m *DB) Init(ctx context.Context) error {
 	// errSkip is used when no migration or version needs to be written
 	// to the database and the transaction can be immediately rolled
 	// back rather than performing a much slower and unnecessary commit.
-	var errSkip = errors.New("skip update")
+	errSkip := errors.New("skip update")
 
 	err := m.db.Update(func(tx *bolt.Tx) error {
 		var (
@@ -293,6 +293,7 @@ func (m *DB) Publisher(ctx context.Context) events.Publisher {
 // since the last garbage collection.
 func (m *DB) RegisterMutationCallback(fn func(bool)) {
 	m.wlock.Lock()
+	//[maxing COMMENT]: 这里添加到回调函数队列里面去。
 	m.mutationCallbacks = append(m.mutationCallbacks, fn)
 	m.wlock.Unlock()
 }
@@ -404,7 +405,7 @@ func (m *DB) GarbageCollect(ctx context.Context) (gc.Stats, error) {
 			//[maxing comment]: 根据content/snapshotter返回事件类型
 			event, err := c.remove(ctx, tx, n)
 			if event != nil && err == nil {
-				//加入到events
+				// 加入到events
 				events = append(events,
 					namespacedEvent{
 						namespace: n.Namespace,
@@ -438,6 +439,7 @@ func (m *DB) GarbageCollect(ctx context.Context) (gc.Stats, error) {
 	// reset dirty, no need for atomic inside of wlock.Lock
 	m.dirty = 0
 
+	//[maxing COMMENT]: dirtySS 代表Snapshot store是脏的
 	if len(m.dirtySS) > 0 {
 		var sl sync.Mutex
 		stats.SnapshotD = map[string]time.Duration{}
@@ -460,6 +462,7 @@ func (m *DB) GarbageCollect(ctx context.Context) (gc.Stats, error) {
 		m.dirtySS = map[string]struct{}{}
 	}
 
+	//[maxing COMMENT]: dirtyCS代表的是content store脏了
 	if m.dirtyCS {
 		wg.Add(1)
 		log.G(ctx).Debug("schedule content cleanup")
@@ -551,6 +554,7 @@ func (m *DB) cleanupSnapshotter(ctx context.Context, name string) (time.Duration
 	return d, err
 }
 
+// [maxing COMMENT]: 清理content
 func (m *DB) cleanupContent(ctx context.Context) (time.Duration, error) {
 	ctx = cleanup.Background(ctx)
 	if m.cs == nil {
